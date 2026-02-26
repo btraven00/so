@@ -5,10 +5,10 @@ A simple, non-verbose command-line tool for searching Stack Overflow directly fr
 ## Features
 
 - 🔍 Quick Stack Overflow searches from the command line
-- 📖 View questions and answers in your terminal
-- 🌐 Open results in your browser
-- ⚡ Fast and minimal output
-- 🎯 No dependencies on Python or TUI libraries
+- 📖 Extract code snippets directly
+- ⚡ Fast and minimal output (accessibility-first)
+- 🎯 Progressive verbosity with flags
+- 🔧 No dependencies on Python or TUI libraries
 
 ## Installation
 
@@ -29,117 +29,107 @@ mv so ~/bin/
 
 ## Usage
 
-### Basic Search
+### Basic Search (snippet only)
 
 ```bash
-so how to reverse a string in go
-so golang slice vs array
+so how to exit vim
+so golang reverse string
 so python list comprehension
 ```
 
-### Interactive Mode
+Output: Just the code snippet from the top answer.
 
-After running a search, you'll see numbered results:
+### Verbosity Levels
 
+**Level 0 (default)** - Just the code snippet:
+```bash
+so how to exit vim
 ```
-Found 10 results:
 
-[1] How to reverse a string in Go?
-    (5 answers)
+**Level 1** - Snippet with context text before/after:
+```bash
+so -v 1 golang http get
+```
 
-[2] Reverse a string in Golang
-    (3 answers)
+**Level 2** - Full details (question, answer score, URL):
+```bash
+so -v 2 python async await
+```
 
+### List Search Results
+
+Show all matching questions with answer counts:
+```bash
+so -l golang channels
+```
+
+Output:
+```
+[1] How do channels work in Go? (15 answers)
+[2] Buffered vs unbuffered channels (8 answers)
+[3] Channel select statement (12 answers)
 ...
-
-Enter number to view (0 to exit, URL to open browser):
 ```
 
-- Enter a number (e.g., `1`) to view the question and answers
-- Enter `0` or press Enter to exit
-- When viewing a question, you can open it in your browser
-
-### Example Session
+### Select Specific Answer
 
 ```bash
-$ so golang http get request
+so -a 2 golang reverse string    # Show 2nd answer instead of 1st
+so -a 3 -v 1 python decorators   # 3rd answer with context
+```
 
-Found 10 results:
+### Control Number of Results
 
-[1] How to make an HTTP GET request in Go?
-    (8 answers)
+```bash
+so -n 5 -l javascript promises   # Show only 5 results
+so -n 20 react hooks            # Search through 20 results
+```
 
-[2] Making HTTP requests in Golang
-    (4 answers)
+## Flags
 
-Enter number to view (0 to exit, URL to open browser): 1
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-v` | Verbosity level (0=snippet, 1=context, 2=full) | 0 |
+| `-l` | List search results with answer counts | false |
+| `-a N` | Show answer number N | 1 |
+| `-n N` | Number of search results to fetch | 10 |
 
-================================================================================
+## Examples
 
-How to make an HTTP GET request in Go?
+```bash
+# Quick snippet
+so how to reverse a string in go
 
---------------------------------------------------------------------------------
+# With explanation context
+so -v 1 golang error handling
 
-I'm trying to make a simple HTTP GET request in Go. What's the standard way
-to do this using the net/http package?
+# See all results first
+so -l python type hints
 
-================================================================================
+# Get the second answer with full details
+so -a 2 -v 2 rust ownership
 
-Top 1 Answer(s):
-
-[Answer 1]
---------------------------------------------------------------------------------
-
-You can use http.Get() for simple GET requests:
-
-resp, err := http.Get("https://example.com")
-if err != nil {
-    // handle error
-}
-defer resp.Body.Close()
-body, err := ioutil.ReadAll(resp.Body)
-
-[URL: https://stackoverflow.com/questions/...]
-
-Open in browser? (y/N):
+# Search through more results
+so -n 20 javascript async patterns
 ```
 
 ## Design Philosophy
 
-This tool is intentionally minimal:
+This tool is intentionally minimal and accessibility-focused:
 
-- **No verbose output** - Clean, readable results
-- **CLI-friendly** - Works well in scripts and terminals
-- **No TUI complexity** - Simple text output, easy to pipe or redirect
+- **Non-verbose by default** - Just gives you the answer
+- **Progressive disclosure** - Add `-v` flags only when you need context
+- **CLI-friendly** - Works well in scripts, easy to pipe or redirect
 - **Fast** - Minimal dependencies, quick startup
-- **Focused** - Does one thing well: search Stack Overflow
+- **Focused** - Does one thing well: get Stack Overflow answers quickly
 
-## Differences from Python Version
+## API
 
-The original Python version (`sample.py`) included:
-
-- Full TUI interface with urwid
-- Code execution and error detection
-- Complex scrolling widgets
-- Real-time output capture
-
-This Go version focuses on:
-
-- Simple search functionality
-- Clean terminal output
-- Minimal dependencies
-- Fast execution
-- Easy to use in scripts
+Uses the official Stack Exchange API v2.3. No rate limiting for reasonable use.
 
 ## Requirements
 
-- Go 1.25+ (for `golang.org/x/net/html`)
-
-## Building
-
-```bash
-go build -o so
-```
+- Go 1.18+
 
 ## License
 
